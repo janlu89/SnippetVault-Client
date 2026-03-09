@@ -1,0 +1,97 @@
+@use '@angular/material' as mat;
+
+@import 'highlight.js/styles/github-dark.css';
+
+html {
+  height: 100%;
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$cyan-palette,
+        tertiary: mat.$orange-palette,
+      ),
+      typography: Roboto,
+      density: 0,
+    )
+  );
+}
+
+body {
+  height: 100%;
+  margin: 0;
+  font-family: Roboto, sans-serif;
+}
+
+// Responsive adjustments — applied at mobile widths (600px and below)
+@media (max-width: 600px) {
+  .page-container {
+    padding: 16px 12px;   // Tighter padding on small screens
+  }
+
+  .page-header {
+    flex-direction: column;    // Stack title and button vertically
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .filter-bar {
+    flex-direction: column;    // Stack filters vertically instead of side by side
+  }
+
+  .filter-field {
+    min-width: unset;          // Remove the 200px minimum on mobile
+    width: 100%;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Shared layout utilities — reused across auth pages and forms
+// ---------------------------------------------------------------------------
+
+// Used on any full-page centered layout (login, register)
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 16px;
+}
+
+// Constrains the card width on large screens, used on login and register
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+}
+
+// Makes any form field or button stretch to fill its container's width.
+// You'll use this on mat-form-field and button elements throughout all forms.
+.full-width {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.submit-button {
+  margin-top: 8px;
+}
+
+// ---------------------------------------------------------------------------
+// Shared feedback utilities — reused wherever API errors are surfaced to users
+// ---------------------------------------------------------------------------
+
+// Uses Material's semantic error colour from the theme, not a hardcoded value.
+// This means if you ever change the theme's error colour, this updates automatically.
+.error-message {
+  color: var(--mat-sys-error);
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+// A subtle highlighted box for inline error messages — more prominent than plain text
+.error-banner {
+  background-color: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+  padding: 12px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-bottom: 16px;
+}

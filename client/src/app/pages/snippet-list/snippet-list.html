@@ -1,0 +1,102 @@
+<div class="page-container">
+  <div class="page-header">
+    <h1>Snippets</h1>
+    @if (authService.isLoggedIn()) {
+      <a mat-flat-button [routerLink]="appRoutes.snippetNew">
+        <mat-icon>add</mat-icon>
+        New Snippet
+      </a>
+    }
+  </div>
+
+  <div class="filter-bar">
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Search</mat-label>
+      <input
+        matInput
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="onFilterChange()"
+        placeholder="Search by title or description..." />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Language</mat-label>
+      <mat-select [(ngModel)]="selectedLanguage" (ngModelChange)="onFilterChange()">
+        <mat-option value="">All Languages</mat-option>
+        @for (lang of languages; track lang) {
+          <mat-option [value]="lang">{{ lang }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <!-- Note the () syntax when reading Signals in the template -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="48" />
+    </div>
+  }
+
+  @if (errorMessage() && !isLoading()) {
+    <p class="error-banner">{{ errorMessage() }}</p>
+  }
+
+  @if (!isLoading() && !errorMessage()) {
+    @if (snippetList()?.items?.length === 0) {
+      <div class="empty-state">
+        <mat-icon>code_off</mat-icon>
+        <p>No snippets found.</p>
+        <p>Try adjusting your search or filters.</p>
+      </div>
+    }
+
+    <div class="snippets-grid">
+      @for (snippet of snippetList()?.items ?? []; track snippet.id) {
+        <mat-card class="snippet-card" [routerLink]="['/snippets', snippet.id]">
+          <mat-card-header>
+            <mat-card-title>{{ snippet.title }}</mat-card-title>
+            <mat-card-subtitle>
+              <mat-chip-set>
+                <mat-chip>{{ snippet.language }}</mat-chip>
+              </mat-chip-set>
+            </mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            @if (snippet.description) {
+              <p class="snippet-description">{{ snippet.description }}</p>
+            }
+            <div class="code-preview">
+              <pre><code [highlight]="getCodePreview(snippet.codeBody)" 
+                        [language]="snippet.language.toLowerCase()"></code></pre>
+            </div>
+            @if ((snippet.tags?.length ?? 0) > 0) {
+              <mat-chip-set class="tag-chips">
+                @for (tag of snippet.tags ?? []; track tag) {
+                  <mat-chip>{{ tag }}</mat-chip>
+                }
+              </mat-chip-set>
+            }
+          </mat-card-content>
+
+          <mat-card-footer class="card-footer">
+            <span class="author">{{ snippet.username }}</span>
+            <span class="date">{{ snippet.createdAt | date:'mediumDate' }}</span>
+          </mat-card-footer>
+        </mat-card>
+      }
+    </div>
+
+    @if (snippetList() && (snippetList()?.totalCount ?? 0) > pageSize) {
+      <mat-paginator
+        [length]="snippetList()!.totalCount"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="[5, 10, 25]"
+        [pageIndex]="currentPage - 1"
+        (page)="onPageChange($event)"
+        aria-label="Select page">
+      </mat-paginator>
+    }
+  }
+</div>
