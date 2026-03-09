@@ -3,11 +3,13 @@ import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { routes } from './app.routes';
 import { authInterceptor } from './interceptors/auth.interceptor';
+import { provideHighlightOptions } from 'ngx-highlightjs';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZonelessChangeDetection(),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([authInterceptor])), // Registers HttpClient with our JWT interceptor
+    provideHttpClient(withInterceptors([authInterceptor])),
+    provideHighlightOptions({  fullLibraryLoader: () => import('highlight.js')})
   ]
 };

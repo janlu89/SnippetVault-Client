@@ -1,1 +1,83 @@
-<p>snippet-detail works!</p>
+<div class="page-container">
+  
+  @if (isLoading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="48" />
+    </div>
+  }
+
+  @if (errorMessage() && !isLoading()) {
+    <p class="error-banner">{{ errorMessage() }}</p>
+  }
+
+  @if (snippet() && !isLoading()) {
+    <div class="page-header">
+      <div class="title-section">
+        <h1>{{ snippet()!.title }}</h1>
+        <mat-chip-set>
+          <mat-chip>{{ snippet()!.language }}</mat-chip>
+          @if (!snippet()!.isPublic) {
+            <mat-chip>Private</mat-chip>
+          }
+        </mat-chip-set>
+      </div>
+
+      <!-- Only show edit/delete if the current user owns this snippet -->
+      @if (isOwner()) {
+        <div class="action-buttons">
+          <a mat-stroked-button [routerLink]="appRoutes.snippetEdit(snippet()!.id)">
+            <mat-icon>edit</mat-icon>
+            Edit
+          </a>
+          <button 
+            mat-stroked-button 
+            color="warn"
+            [disabled]="isDeleting()"
+            (click)="deleteSnippet()">
+            <mat-icon>delete</mat-icon>
+            @if (isDeleting()) { Deleting... } @else { Delete }
+          </button>
+        </div>
+      }
+    </div>
+
+    <!-- Metadata row -->
+    <div class="metadata">
+      <span>By {{ snippet()!.username }}</span>
+      <span>Created {{ snippet()!.createdAt | date:'mediumDate' }}</span>
+      @if (snippet()!.updatedAt) {
+        <span>Updated {{ snippet()!.updatedAt | date:'mediumDate' }}</span>
+      }
+    </div>
+
+    <!-- Description -->
+    @if (snippet()!.description) {
+      <p class="description">{{ snippet()!.description }}</p>
+    }
+
+    <!-- Syntax highlighted code block -->
+    <!-- The [highlight] directive from ngx-highlightjs automatically detects
+         the language and applies the appropriate colour theme -->
+    <div class="code-block">
+      <pre><code [highlight]="snippet()!.codeBody" [language]="snippet()!.language.toLowerCase()"></code></pre>
+    </div>
+
+    <!-- Tags -->
+    @if ((snippet()!.tags?.length ?? 0) > 0) {
+      <mat-chip-set class="tag-chips">
+        @for (tag of snippet()!.tags ?? []; track tag) {
+          <mat-chip>{{ tag }}</mat-chip>
+        }
+      </mat-chip-set>
+    }
+
+    <!-- Back navigation -->
+    <div class="back-link">
+      <a mat-button [routerLink]="appRoutes.snippets">
+        <mat-icon>arrow_back</mat-icon>
+        Back to Snippets
+      </a>
+    </div>
+  }
+
+</div>

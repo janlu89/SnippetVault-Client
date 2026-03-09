@@ -1,1 +1,120 @@
-<p>snippet-form works!</p>
+<div class="page-container">
+    <div class="page-header">
+        <h1>{{ pageTitle }}</h1>
+    </div>
+
+    @if (isLoading()) {
+    <div class="loading-container">
+        <mat-spinner diameter="48" />
+    </div>
+    }
+
+    @if (errorMessage()) {
+    <p class="error-banner">{{ errorMessage() }}</p>
+    }
+
+    @if (!isLoading()) {
+    <mat-card>
+        <mat-card-content>
+            <form [formGroup]="snippetForm" (ngSubmit)="onSubmit()">
+
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Title</mat-label>
+                    <input matInput formControlName="title" placeholder="A descriptive title" />
+                    @if (snippetForm.get('title')?.touched && snippetForm.get('title')?.hasError('required')) {
+                    <mat-error>Title is required</mat-error>
+                    }
+                    @if (snippetForm.get('title')?.hasError('maxlength')) {
+                    <mat-error>Title must be 200 characters or less</mat-error>
+                    }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Description (optional)</mat-label>
+                    <textarea matInput formControlName="description" rows="2"
+                        placeholder="What does this snippet do?"></textarea>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Language</mat-label>
+                    <mat-select formControlName="language">
+                        @for (lang of languages; track lang) {
+                        <mat-option [value]="lang">{{ lang }}</mat-option>
+                        }
+                    </mat-select>
+                    @if (snippetForm.get('language')?.touched && snippetForm.get('language')?.hasError('required')) {
+                    <mat-error>Language is required</mat-error>
+                    }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Code</mat-label>
+                    <textarea matInput formControlName="codeBody" rows="12" placeholder="Paste your code here..."
+                        class="code-textarea">
+            </textarea>
+                    @if (snippetForm.get('codeBody')?.touched && snippetForm.get('codeBody')?.hasError('required')) {
+                    <mat-error>Code is required</mat-error>
+                    }
+                </mat-form-field>
+
+                <!-- Tag input with autocomplete -->
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Tags</mat-label>
+                    <!-- MatChipGrid displays the currently added tags as removable chips -->
+                    <mat-chip-grid #chipGrid>
+                        @for (tag of tags; track tag) {
+                        <mat-chip-row (removed)="removeTag(tag)">
+                            {{ tag }}
+                            <button matChipRemove>
+                                <mat-icon>cancel</mat-icon>
+                            </button>
+                        </mat-chip-row>
+                        }
+                    </mat-chip-grid>
+                    <input #tagInputRef placeholder="Add tags..." [matChipInputFor]="chipGrid"
+                        [matChipInputSeparatorKeyCodes]="separatorKeysCodes" [matAutocomplete]="auto"
+                        (matChipInputTokenEnd)="onTagInputConfirm($event)" (input)="onTagSearch($event)" />
+
+                    <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onTagSelected($event, tagInputRef)">
+                        @for (suggestion of tagSuggestions(); track suggestion) {
+                        <mat-option [value]="suggestion">{{ suggestion }}</mat-option>
+                        }
+                    </mat-autocomplete>
+                </mat-form-field>
+
+                <!-- Public/private toggle -->
+                <div class="toggle-row">
+                    <mat-slide-toggle formControlName="isPublic">
+                        {{ snippetForm.get('isPublic')?.value ? 'Public' : 'Private' }}
+                    </mat-slide-toggle>
+                    <span class="toggle-hint">
+                        @if (snippetForm.get('isPublic')?.value) {
+                        Anyone can see this snippet
+                        } @else {
+                        Only you can see this snippet
+                        }
+                    </span>
+                </div>
+
+                @if (errorMessage()) {
+                <p class="error-message">{{ errorMessage() }}</p>
+                }
+
+                <!-- Form actions -->
+                <div class="form-actions">
+                    <a mat-stroked-button [routerLink]="appRoutes.snippets">Cancel</a>
+                    <button mat-flat-button type="submit" [disabled]="snippetForm.invalid || isSubmitting()">
+                        @if (isSubmitting()) {
+                        <mat-spinner diameter="20" />
+                        } @else {
+                        {{ submitLabel }}
+                        }
+                    </button>
+                </div>
+
+            </form>
+        </mat-card-content>
+    </mat-card>
+    }
+
+</div>

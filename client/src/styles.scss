@@ -1,5 +1,7 @@
 @use '@angular/material' as mat;
 
+@import 'highlight.js/styles/github-dark.css';
+
 html {
   height: 100%;
   @include mat.theme(

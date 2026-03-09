@@ -15,6 +15,7 @@ import { SnippetService } from '../../services/snippet.service';
 import { AuthService } from '../../services/auth.service';
 import { SnippetListResponse } from '../../models/snippet.models';
 import { APP_ROUTES } from '../../constants/app.routes.constants';
+import { Highlight } from 'ngx-highlightjs';
 
 const SUPPORTED_LANGUAGES = [
   'C#', 'TypeScript', 'JavaScript', 'Python', 'Java',
@@ -28,7 +29,7 @@ const SUPPORTED_LANGUAGES = [
     RouterLink, FormsModule, DatePipe,
     MatCardModule, MatButtonModule, MatFormFieldModule,
     MatInputModule, MatSelectModule, MatChipsModule,
-    MatPaginatorModule, MatProgressSpinnerModule, MatIconModule,
+    MatPaginatorModule, MatProgressSpinnerModule, MatIconModule,Highlight
   ],
   templateUrl: './snippet-list.html',
   styleUrl: './snippet-list.scss'

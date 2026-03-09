@@ -67,7 +67,10 @@
             @if (snippet.description) {
               <p class="snippet-description">{{ snippet.description }}</p>
             }
-            <pre class="code-preview">{{ getCodePreview(snippet.codeBody) }}</pre>
+            <div class="code-preview">
+              <pre><code [highlight]="getCodePreview(snippet.codeBody)" 
+                        [language]="snippet.language.toLowerCase()"></code></pre>
+            </div>
             @if ((snippet.tags?.length ?? 0) > 0) {
               <mat-chip-set class="tag-chips">
                 @for (tag of snippet.tags ?? []; track tag) {

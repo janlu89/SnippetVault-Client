@@ -10,7 +10,6 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/snippet-list/snippet-list')
       .then(m => m.SnippetList)
   },
-
   {
     path: 'login',
     canActivate: [guestGuard],
@@ -28,18 +27,20 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/snippet-list/snippet-list')
       .then(m => m.SnippetList)
   },
-  {
-    path: 'snippets/:id',
-    loadComponent: () => import('./pages/snippet-detail/snippet-detail')
-      .then(m => m.SnippetDetail)
-  },
 
-  // Protected routes — authGuard redirects to /login if not authenticated
+  // IMPORTANT: static routes must come before dynamic :id routes.
+  // 'snippets/new' must be above 'snippets/:id' — otherwise Angular
+  // matches /snippets/new as id="new" and sends a GET to the API with that value.
   {
     path: 'snippets/new',
     canActivate: [authGuard],
     loadComponent: () => import('./pages/snippet-form/snippet-form')
       .then(m => m.SnippetForm)
+  },
+  {
+    path: 'snippets/:id',
+    loadComponent: () => import('./pages/snippet-detail/snippet-detail')
+      .then(m => m.SnippetDetail)
   },
   {
     path: 'snippets/:id/edit',
