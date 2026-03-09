@@ -1,0 +1,67 @@
+<div class="auth-container">
+  <mat-card class="auth-card">
+    <mat-card-header>
+      <mat-card-title>Create an account</mat-card-title>
+      <mat-card-subtitle>Start building your snippet library</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Username</mat-label>
+          <input matInput formControlName="username" placeholder="janlu89" />
+          @if (registerForm.get('username')?.touched && registerForm.get('username')?.hasError('required')) {
+            <mat-error>Username is required</mat-error>
+          }
+          @if (registerForm.get('username')?.touched && registerForm.get('username')?.hasError('minlength')) {
+            <mat-error>Username must be at least 3 characters</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" placeholder="you@example.com" />
+          @if (registerForm.get('email')?.touched && registerForm.get('email')?.hasError('required')) {
+            <mat-error>Email is required</mat-error>
+          }
+          @if (registerForm.get('email')?.touched && registerForm.get('email')?.hasError('email')) {
+            <mat-error>Please enter a valid email address</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input matInput type="password" formControlName="password" />
+          @if (registerForm.get('password')?.touched && registerForm.get('password')?.hasError('required')) {
+            <mat-error>Password is required</mat-error>
+          }
+          @if (registerForm.get('password')?.touched && registerForm.get('password')?.hasError('minlength')) {
+            <mat-error>Password must be at least 6 characters</mat-error>
+          }
+        </mat-form-field>
+
+        @if (errorMessage) {
+          <p class="error-message">{{ errorMessage }}</p>
+        }
+
+        <button
+          mat-flat-button
+          type="submit"
+          class="full-width submit-button"
+          [disabled]="registerForm.invalid || isLoading">
+          @if (isLoading) {
+            <mat-spinner diameter="20" />
+          } @else {
+            Create Account
+          }
+        </button>
+
+      </form>
+    </mat-card-content>
+
+    <mat-card-actions>
+      <p>Already have an account? <a routerLink="/login">Sign in here</a></p>
+    </mat-card-actions>
+  </mat-card>
+</div>

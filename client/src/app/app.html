@@ -1,0 +1,19 @@
+<!-- MatToolbar is the persistent navigation bar at the top of every page -->
+<mat-toolbar color="primary">
+  
+  <!-- App name on the left — clicking it navigates to the root path -->
+  <a routerLink="/" class="app-title">SnippetVault</a>
+
+  <span class="toolbar-spacer"></span>
+
+  @if (authService.isLoggedIn()) {
+    <span class="username">{{ authService.currentUser()?.username }}</span>
+    <button mat-button (click)="authService.logout()">Logout</button>
+  } @else {
+    <a mat-button routerLink="/login">Login</a>
+    <a mat-button routerLink="/register">Register</a>
+  }
+
+</mat-toolbar>
+
+<router-outlet />

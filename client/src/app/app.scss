@@ -1,0 +1,84 @@
+.app-title {
+  text-decoration: none; 
+  color: inherit;             
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.toolbar-spacer {
+  flex: 1;
+}
+
+.username {
+  margin-right: 8px;
+  opacity: 0.85;  
+}
+
+// ---------------------------------------------------------------------------
+// Page layout — reused across all full-page content components
+// ---------------------------------------------------------------------------
+
+// Centres page content with a max width and consistent padding.
+// Use this as the outermost wrapper on every page component.
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+// A flex row with a title on the left and an action button on the right.
+// Used on list pages, detail pages, and form pages consistently.
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+
+  h1 {
+    margin: 0;
+    font-size: 1.8rem;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Async state indicators — reused on every data-fetching component
+// ---------------------------------------------------------------------------
+
+// Centres a spinner vertically and horizontally in the content area
+.loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 48px 0;
+}
+
+// Empty state for list pages that return zero results
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 0;
+  opacity: 0.6;
+
+  mat-icon {
+    font-size: 48px;
+    height: 48px;
+    width: 48px;
+    margin-bottom: 16px;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Filter bar — reused on any page with search/filter controls
+// ---------------------------------------------------------------------------
+
+.filter-bar {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.filter-field {
+  flex: 1;
+  min-width: 200px;
+}
