@@ -13,6 +13,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { SnippetService } from '../../services/snippet.service';
 import { AuthService } from '../../services/auth.service';
+import { TitleService } from '../../services/title.service';
 import { SnippetListResponse } from '../../models/snippet.models';
 import { APP_ROUTES } from '../../constants/app.routes.constants';
 import { Highlight } from 'ngx-highlightjs';
@@ -35,20 +36,10 @@ const SUPPORTED_LANGUAGES = [
   styleUrl: './snippet-list.scss'
 })
 export class SnippetList implements OnInit {
-  // These three properties drive the template's visual state.
-  // They MUST be Signals because they change inside async callbacks
-  // (HTTP subscribe handlers), and zoneless change detection only
-  // re-renders the template when a Signal it reads changes value.
-  // Plain properties changed inside async callbacks are invisible to
-  // Angular's change detection in a zoneless application.
   snippetList = signal<SnippetListResponse | null>(null);
   isLoading = signal(false);
   errorMessage = signal('');
 
-  // Filter properties stay as plain properties because they're written
-  // by [(ngModel)], which Angular's forms module handles separately.
-  // Angular knows about ngModel changes through a different mechanism
-  // that doesn't require Signals.
   searchTerm = '';
   selectedLanguage = '';
   selectedTag = '';
@@ -60,17 +51,16 @@ export class SnippetList implements OnInit {
 
   constructor(
     private snippetService: SnippetService,
+    private titleService: TitleService,
     public authService: AuthService
   ) {}
 
   ngOnInit() {
+    this.titleService.setTitle('Snippets');
     this.loadSnippets();
   }
 
   loadSnippets() {
-    // signal.set() is how you update a Signal's value —
-    // Angular immediately knows to re-evaluate any template
-    // that reads this Signal.
     this.isLoading.set(true);
     this.errorMessage.set('');
 
@@ -82,9 +72,6 @@ export class SnippetList implements OnInit {
       this.selectedTag || undefined
     ).subscribe({
       next: (response) => {
-        // When these Signals are set inside the subscribe callback,
-        // Angular sees the change and re-renders the template immediately —
-        // even though this is inside an async callback with no Zone.js watching.
         this.snippetList.set(response);
         this.isLoading.set(false);
       },

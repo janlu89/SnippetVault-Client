@@ -1,6 +1,15 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { COMMA, ENTER } from '@angular/cdk/keycodes';
+import { SnippetService } from '../../services/snippet.service';
+import { TagService } from '../../services/tag.service';
+import { APP_ROUTES } from '../../constants/app.routes.constants';
+import { RouterLink } from '@angular/router';
+import { NotificationService } from '../../services/notification.service';
+import { TitleService } from '../../services/title.service';
+
+// Angular Material imports
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -11,11 +20,6 @@ import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/ma
 import { MatIconModule } from '@angular/material/icon';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { COMMA, ENTER } from '@angular/cdk/keycodes';
-import { SnippetService } from '../../services/snippet.service';
-import { TagService } from '../../services/tag.service';
-import { APP_ROUTES } from '../../constants/app.routes.constants';
-import { RouterLink } from '@angular/router';
 
 const SUPPORTED_LANGUAGES = [
   'C#', 'TypeScript', 'JavaScript', 'Python', 'Java',
@@ -44,14 +48,10 @@ const SUPPORTED_LANGUAGES = [
 })
 export class SnippetForm implements OnInit {
   snippetForm: FormGroup;
-  
-  // Tags are managed outside the reactive form because they're a dynamic
-  // list rather than a simple scalar value. The form handles title, description,
-  // etc., but tags are tracked separately as an array of strings.
+
   tags: string[] = [];
   tagSuggestions = signal<string[]>([]);
-  
-  // Key codes that confirm a tag input — Enter and comma both add a tag
+
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
 
   isEditMode = false;
@@ -68,7 +68,9 @@ export class SnippetForm implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private snippetService: SnippetService,
-    private tagService: TagService
+    private tagService: TagService,
+    private notificationService: NotificationService,
+    private titleService: TitleService
   ) {
     this.snippetForm = this.fb.group({
       title: ['', [Validators.required, Validators.maxLength(200)]],
@@ -80,11 +82,9 @@ export class SnippetForm implements OnInit {
   }
 
   ngOnInit() {
-    // Detect edit mode by checking for an 'id' param in the route.
-    // /snippets/new → no id → create mode
-    // /snippets/abc-123/edit → id = 'abc-123' → edit mode
     this.snippetId = this.route.snapshot.paramMap.get('id');
     this.isEditMode = !!this.snippetId;
+    this.titleService.setTitle(this.isEditMode ? 'Edit Snippet' : 'New Snippet');
 
     if (this.isEditMode && this.snippetId) {
       this.loadExistingSnippet(this.snippetId);
@@ -95,10 +95,6 @@ export class SnippetForm implements OnInit {
     this.isLoading.set(true);
     this.snippetService.getSnippetById(id).subscribe({
       next: (snippet) => {
-        // Patch the form with the existing snippet's values.
-        // patchValue is safer than setValue because it only updates
-        // the fields you provide — useful when the API returns extra
-        // fields that don't have corresponding form controls.
         this.snippetForm.patchValue({
           title: snippet.title,
           description: snippet.description ?? '',
@@ -106,7 +102,6 @@ export class SnippetForm implements OnInit {
           language: snippet.language,
           isPublic: snippet.isPublic
         });
-        // Populate the tags array separately since it's not in the form
         this.tags = [...(snippet.tags ?? [])];
         this.isLoading.set(false);
       },
@@ -117,34 +112,34 @@ export class SnippetForm implements OnInit {
     });
   }
 
-  // Called whenever the user types in the tag input field.
-  // Fetches matching tags from the API to populate the autocomplete dropdown.
   onTagSearch(event: Event) {
-    const value = (event.target as HTMLInputElement).value;
-    if (value.trim().length < 1) {
-      this.tagSuggestions.set([]);
-      return;
-    }
-    this.tagService.getTags(value).subscribe({
-      next: (tags) => {
-        // Filter out tags the user has already added to avoid duplicates in suggestions
-        this.tagSuggestions.set(
-          tags
-            .map(t => t.name)
-            .filter(name => !this.tags.includes(name))
-        );
-      }
-    });
+  const value = (event.target as HTMLInputElement).value;
+  if (value.trim().length < 1) {
+    this.tagSuggestions.set([]);
+    return;
   }
+  this.tagService.getTags(value).subscribe({
+    next: (tags) => {
+      if (!Array.isArray(tags)) {
+        this.tagSuggestions.set([]);
+        return;
+      }
+      this.tagSuggestions.set(
+        tags
+          .map(t => t.name)
+          .filter(name => !this.tags.includes(name))
+      );
+    },
+    error: () => this.tagSuggestions.set([])
+  });
+}
 
-  // Called when the user selects a suggestion from the autocomplete dropdown
   onTagSelected(event: MatAutocompleteSelectedEvent, tagInput: HTMLInputElement) {
     this.addTag(event.option.value);
-    tagInput.value = '';   // Clear the input after selection
+    tagInput.value = '';
     this.tagSuggestions.set([]);
   }
 
-  // Called when the user presses Enter or comma in the tag input
   onTagInputConfirm(event: MatChipInputEvent) {
     const value = event.value.trim().toLowerCase();
     if (value && !this.tags.includes(value)) {
@@ -183,11 +178,13 @@ export class SnippetForm implements OnInit {
 
     operation.subscribe({
       next: (snippet) => {
-        // After save, navigate to the detail page of the saved snippet
+        this.notificationService.success(
+          this.isEditMode ? 'Snippet updated successfully!' : 'Snippet created successfully!'
+        );
         this.router.navigate([this.appRoutes.snippetDetail(snippet.id)]);
       },
       error: (err) => {
-        this.errorMessage.set(err.error?.message ?? 'Failed to save snippet.');
+        this.notificationService.error(err.error?.message ?? 'Failed to save snippet.');
         this.isSubmitting.set(false);
       }
     });

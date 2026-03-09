@@ -14,6 +14,11 @@
   opacity: 0.85;  
 }
 
+@media (max-width: 600px) {
+  .username {
+    display: none;    // Hide username on very small screens — the logout button is enough
+  }
+}
 // ---------------------------------------------------------------------------
 // Page layout — reused across all full-page content components
 // ---------------------------------------------------------------------------
@@ -81,4 +86,21 @@
 .filter-field {
   flex: 1;
   min-width: 200px;
+}
+
+// ---------------------------------------------------------------------------
+// Snackbar notification styles — panelClass targets the snackbar container
+// ---------------------------------------------------------------------------
+// Snackbar notification styles — panelClass targets the snackbar container
+// These must be in the global stylesheet, not a component stylesheet,
+// because Material renders snackbars outside the component's DOM tree
+// and component-scoped CSS cannot reach them.
+.snackbar-success .mdc-snackbar__surface {
+  background-color: #2e7d32 !important;   // Material green-800
+  color: white !important;
+}
+
+.snackbar-error .mdc-snackbar__surface {
+  background-color: #c62828 !important;   // Material red-800
+  color: white !important;
 }

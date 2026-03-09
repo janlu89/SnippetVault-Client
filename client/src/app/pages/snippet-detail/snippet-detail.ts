@@ -7,12 +7,15 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialog } from '../../shared/confirm-dialog/confirm-dialog';
 import { MatDialogModule } from '@angular/material/dialog';
 import { Highlight } from 'ngx-highlightjs';
 import { SnippetService } from '../../services/snippet.service';
 import { AuthService } from '../../services/auth.service';
+import { TitleService } from '../../services/title.service';
 import { SnippetResponse } from '../../models/snippet.models';
 import { APP_ROUTES } from '../../constants/app.routes.constants';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-snippet-detail',
@@ -40,11 +43,14 @@ export class SnippetDetail implements OnInit {
   readonly appRoutes = APP_ROUTES;
 
   constructor(
-    private route: ActivatedRoute, 
+    private route: ActivatedRoute,
     private router: Router,
     private snippetService: SnippetService,
-    public authService: AuthService
-  ) {}
+    public authService: AuthService,
+    private dialog: MatDialog,
+    private notificationService: NotificationService,
+    private titleService: TitleService
+  ) { }
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -60,6 +66,7 @@ export class SnippetDetail implements OnInit {
     this.snippetService.getSnippetById(id).subscribe({
       next: (response) => {
         this.snippet.set(response);
+        this.titleService.setTitle(response.title);
         this.isLoading.set(false);
       },
       error: (err) => {
@@ -81,20 +88,30 @@ export class SnippetDetail implements OnInit {
     const snippet = this.snippet();
     if (!snippet) return;
 
-    if (!confirm('Are you sure you want to delete this snippet? This cannot be undone.')) {
-      return;
-    }
-
-    this.isDeleting.set(true);
-    this.snippetService.deleteSnippet(snippet.id).subscribe({
-      next: () => {
-        // After deletion, navigate back to the list
-        this.router.navigate([this.appRoutes.snippets]);
-      },
-      error: (err) => {
-        this.errorMessage.set(err.error?.message ?? 'Failed to delete snippet.');
-        this.isDeleting.set(false);
+    const dialogRef = this.dialog.open(ConfirmDialog, {
+      width: '400px',
+      data: {
+        title: 'Delete Snippet',
+        message: `Are you sure you want to delete "${snippet.title}"? This cannot be undone.`,
+        confirmLabel: 'Delete',
+        cancelLabel: 'Cancel'
       }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+
+      this.isDeleting.set(true);
+      this.snippetService.deleteSnippet(snippet.id).subscribe({
+        next: () => {
+          this.notificationService.success('Snippet deleted successfully.');
+          this.router.navigate([this.appRoutes.snippets]);
+        },
+        error: (err) => {
+          this.errorMessage.set(err.error?.message ?? 'Failed to delete snippet.');
+          this.isDeleting.set(false);
+        }
+      });
     });
   }
 }

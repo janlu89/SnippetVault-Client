@@ -22,6 +22,28 @@ body {
   font-family: Roboto, sans-serif;
 }
 
+// Responsive adjustments — applied at mobile widths (600px and below)
+@media (max-width: 600px) {
+  .page-container {
+    padding: 16px 12px;   // Tighter padding on small screens
+  }
+
+  .page-header {
+    flex-direction: column;    // Stack title and button vertically
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .filter-bar {
+    flex-direction: column;    // Stack filters vertically instead of side by side
+  }
+
+  .filter-field {
+    min-width: unset;          // Remove the 200px minimum on mobile
+    width: 100%;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Shared layout utilities — reused across auth pages and forms
 // ---------------------------------------------------------------------------

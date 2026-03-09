@@ -22,3 +22,13 @@
   gap: 12px;
   margin-top: 24px;
 }
+
+@media (max-width: 600px) {
+  .form-actions {
+    flex-direction: column;
+    
+    a, button {
+      width: 100%;
+    }
+  }
+}
