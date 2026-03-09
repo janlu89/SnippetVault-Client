@@ -21,8 +21,12 @@ jobs:
         working-directory: client
         run: npm ci
 
+      - name: Build
+        working-directory: client
+        run: npx ng build --base-href=/SnippetVault-Client/
+
       - name: Deploy to GitHub Pages
         working-directory: client
-        run: npx angular-cli-ghpages --dir=dist/client/browser --base-href=/SnippetVault-Client/
+        run: npx angular-cli-ghpages --dir=dist/client/browser
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
